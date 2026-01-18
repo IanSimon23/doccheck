@@ -170,7 +170,7 @@ function readReadme(rootPath: string): string | null {
 function parseReadmeClaims(readme: string): ReadmeClaims {
   return {
     techStack: extractTechStackClaims(readme),
-    structure: [], // TODO: future iteration
+    structure: extractStructureClaims(readme),
     commands: [],  // TODO: future iteration
   };
 }
@@ -231,4 +231,81 @@ function extractTechStackClaims(readme: string): string[] {
     .map(c => c.replace(/\s+v?\d+(\.\d+)*\s*$/, '').trim()) // remove "v1.2.3" style versions
     .filter(c => c.length > 1)                              // filter tiny strings
     .filter((c, i, arr) => arr.indexOf(c) === i);           // dedupe
+}
+
+function extractStructureClaims(readme: string): string[] {
+  const claims: string[] = [];
+  const lines = readme.split('\n');
+
+  // Find code blocks that look like directory trees
+  let inCodeBlock = false;
+  let codeBlockContent: string[] = [];
+
+  for (const line of lines) {
+    if (line.trim().startsWith('```')) {
+      if (inCodeBlock) {
+        // End of code block - check if it's a directory tree
+        const treeEntries = parseDirectoryTree(codeBlockContent);
+        claims.push(...treeEntries);
+        codeBlockContent = [];
+      }
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeBlockContent.push(line);
+    }
+  }
+
+  return claims.filter((c, i, arr) => arr.indexOf(c) === i); // dedupe
+}
+
+function parseDirectoryTree(lines: string[]): string[] {
+  const entries: string[] = [];
+
+  // Track if this looks like a directory tree (has tree chars or ends with /)
+  let looksLikeTree = false;
+
+  // Track directory stack based on indentation
+  const dirStack: { indent: number; name: string }[] = [];
+
+  for (const line of lines) {
+    // Calculate indentation level (count leading spaces and tree chars)
+    const indentMatch = line.match(/^([\s│├└─┬┼]*)/);
+    const indent = indentMatch ? indentMatch[1].length : 0;
+
+    // Remove tree drawing characters: ├── └── │ ─
+    const cleaned = line
+      .replace(/[├└│─┬┼]/g, '')
+      .replace(/\s+#.*$/, '')  // remove comments
+      .trim();
+
+    if (!cleaned) continue;
+
+    // Check if line has tree indicators
+    if (line.includes('├') || line.includes('└') || line.includes('│')) {
+      looksLikeTree = true;
+    }
+
+    // Pop directories from stack that are at same or deeper indent
+    while (dirStack.length > 0 && dirStack[dirStack.length - 1].indent >= indent) {
+      dirStack.pop();
+    }
+
+    // Extract directory (ends with /)
+    if (cleaned.endsWith('/')) {
+      // Build full path from stack
+      const parentPath = dirStack.map(d => d.name).join('');
+      const fullPath = parentPath + cleaned;
+      entries.push(fullPath);
+
+      // Push to stack for children
+      dirStack.push({ indent, name: cleaned });
+      looksLikeTree = true;
+    }
+  }
+
+  // Only return entries if this looked like a directory tree
+  return looksLikeTree ? entries : [];
 }

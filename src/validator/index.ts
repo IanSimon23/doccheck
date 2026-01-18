@@ -1,3 +1,5 @@
+import { existsSync } from 'fs';
+import { join } from 'path';
 import type { ProjectInfo } from '../scanner/index.js';
 
 export interface ValidationResult {
@@ -83,7 +85,15 @@ function validateStructure(content: string, info: ProjectInfo): ValidationResult
 function validateReadmeClaims(info: ProjectInfo): ValidationResult[] {
   const results: ValidationResult[] = [];
 
-  if (!info.readmeClaims || !info.packageManager) {
+  if (!info.readmeClaims) {
+    return results;
+  }
+
+  // Validate structure claims
+  results.push(...validateStructureClaims(info));
+
+  // Tech stack validation requires package manager
+  if (!info.packageManager) {
     return results;
   }
 
@@ -181,4 +191,64 @@ function normalizeTechName(name: string): string {
     .toLowerCase()
     .replace(/[\s\-_.]+/g, '')
     .replace(/\.js$/, 'js');
+}
+
+function validateStructureClaims(info: ProjectInfo): ValidationResult[] {
+  const results: ValidationResult[] = [];
+
+  if (!info.readmeClaims?.structure.length) {
+    return results;
+  }
+
+  const projectRoot = info.path;
+  const projectName = info.name;
+
+  // Normalize claimed paths - strip project name prefix if present
+  const normalizedClaims = info.readmeClaims.structure
+    .map(s => {
+      // Strip "projectname/" prefix
+      const prefixPattern = new RegExp(`^${projectName}/`);
+      return s.replace(prefixPattern, '');
+    })
+    .filter(s => s && s !== '/');  // filter empty and root-only
+
+  for (const claimed of normalizedClaims) {
+    // Normalize: remove trailing slash
+    const dirPath = claimed.replace(/\/$/, '');
+
+    if (!dirPath) continue;
+
+    // Check if directory exists
+    const fullPath = join(projectRoot, dirPath);
+    if (!existsSync(fullPath)) {
+      results.push({
+        rule: 'readme-structure-drift',
+        severity: 'warning',
+        message: `README documents "${claimed}" but directory doesn't exist`,
+        suggestion: `Remove "${claimed}" from README or create the directory`,
+      });
+    }
+  }
+
+  // Check for actual directories not in README claims
+  const actualDirs = info.structure.directories;
+  for (const dir of actualDirs) {
+    const documented = normalizedClaims.some(s => {
+      const normalized = s.replace(/\/$/, '');
+      return normalized === dir ||
+        normalized.startsWith(dir + '/') ||
+        dir.startsWith(normalized + '/');
+    });
+
+    if (!documented) {
+      results.push({
+        rule: 'readme-structure-incomplete',
+        severity: 'info',
+        message: `Directory "${dir}/" exists but not documented in README`,
+        suggestion: `Consider adding "${dir}/" to README project structure`,
+      });
+    }
+  }
+
+  return results;
 }
