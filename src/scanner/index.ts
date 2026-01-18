@@ -10,6 +10,13 @@ export interface ProjectInfo {
   testPatterns: string[];
   cicd: CiCdInfo | null;
   readme: string | null;
+  readmeClaims: ReadmeClaims | null;
+}
+
+export interface ReadmeClaims {
+  techStack: string[];
+  structure: string[];
+  commands: string[];
 }
 
 export interface PackageManagerInfo {
@@ -38,6 +45,7 @@ export async function scanProject(rootPath: string): Promise<ProjectInfo> {
   const { hasTests, testPatterns } = detectTestSetup(rootPath, packageManager);
   const cicd = detectCiCd(rootPath);
   const readme = readReadme(rootPath);
+  const readmeClaims = readme ? parseReadmeClaims(readme) : null;
 
   return {
     name,
@@ -48,6 +56,7 @@ export async function scanProject(rootPath: string): Promise<ProjectInfo> {
     testPatterns,
     cicd,
     readme,
+    readmeClaims,
   };
 }
 
@@ -156,4 +165,70 @@ function readReadme(rootPath: string): string | null {
     return readFileSync(readmePath, 'utf-8');
   }
   return null;
+}
+
+function parseReadmeClaims(readme: string): ReadmeClaims {
+  return {
+    techStack: extractTechStackClaims(readme),
+    structure: [], // TODO: future iteration
+    commands: [],  // TODO: future iteration
+  };
+}
+
+function extractTechStackClaims(readme: string): string[] {
+  const claims: string[] = [];
+  const lines = readme.split('\n');
+
+  // Find tech stack section (various common headings)
+  const techHeadings = ['tech stack', 'built with', 'technologies', 'stack'];
+  let inTechSection = false;
+  let sectionDepth = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim().toLowerCase();
+
+    // Check if entering a tech stack section
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)/);
+    if (headingMatch) {
+      const depth = headingMatch[1].length;
+      const headingText = headingMatch[2].toLowerCase();
+
+      if (techHeadings.some(h => headingText.includes(h))) {
+        inTechSection = true;
+        sectionDepth = depth;
+        continue;
+      }
+
+      // Exit section if we hit another heading at same or higher level
+      if (inTechSection && depth <= sectionDepth) {
+        inTechSection = false;
+      }
+    }
+
+    if (inTechSection) {
+      // Extract from list items: "- **Frontend**: React 18, Vite, Tailwind CSS"
+      const listMatch = line.match(/^[-*]\s+\*?\*?([^:*]+)\*?\*?:\s*(.+)/);
+      if (listMatch) {
+        // Split on comma only, preserve multi-word tech names
+        const techs = listMatch[2].split(/,/).map(t => t.trim()).filter(Boolean);
+        claims.push(...techs);
+        continue;
+      }
+
+      // Extract from simple list items: "- React"
+      const simpleListMatch = line.match(/^[-*]\s+(.+)/);
+      if (simpleListMatch) {
+        claims.push(simpleListMatch[1].trim());
+      }
+    }
+  }
+
+  // Normalize: remove version numbers, parens, clean up
+  return claims
+    .map(c => c.replace(/\([^)]*\)/g, '').trim())           // remove parentheticals
+    .map(c => c.replace(/\*\*/g, '').trim())                // remove bold markers
+    .map(c => c.replace(/\s+\d+(\.\d+)*\s*$/, '').trim())   // remove trailing version numbers (e.g., "React 18" -> "React")
+    .map(c => c.replace(/\s+v?\d+(\.\d+)*\s*$/, '').trim()) // remove "v1.2.3" style versions
+    .filter(c => c.length > 1)                              // filter tiny strings
+    .filter((c, i, arr) => arr.indexOf(c) === i);           // dedupe
 }

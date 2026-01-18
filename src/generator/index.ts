@@ -122,8 +122,13 @@ function extractFirstParagraph(readme: string): string | null {
   let paragraph = '';
 
   for (const line of lines) {
-    if (line.startsWith('#')) continue;
-    if (line.trim() === '') {
+    const trimmed = line.trim();
+    // Skip headings, images, badges, and horizontal rules
+    if (trimmed.startsWith('#')) continue;
+    if (trimmed.startsWith('![')) continue;
+    if (trimmed.startsWith('[![')) continue;
+    if (trimmed === '---') continue;
+    if (trimmed === '') {
       if (inParagraph && paragraph.trim()) {
         return paragraph.trim();
       }
