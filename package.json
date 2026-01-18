@@ -1,0 +1,35 @@
+{
+  "name": "claudemd",
+  "version": "0.1.0",
+  "description": "CLI tool that generates and maintains living CLAUDE.md documentation",
+  "type": "module",
+  "bin": {
+    "claudemd": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "keywords": [
+    "documentation",
+    "claude",
+    "cli",
+    "markdown"
+  ],
+  "author": "Ian",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "commander": "^13.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
