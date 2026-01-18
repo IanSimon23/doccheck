@@ -2,6 +2,7 @@
 import { Command } from 'commander';
 import { initCommand } from './commands/init.js';
 import { checkCommand } from './commands/check.js';
+import { serveCommand } from './commands/serve.js';
 
 const program = new Command();
 
@@ -23,5 +24,11 @@ program
   .option('-f, --file <path>', 'Path to CLAUDE.md', './CLAUDE.md')
   .option('--json', 'Output results as JSON')
   .action(checkCommand);
+
+program
+  .command('serve')
+  .description('Start web interface for interactive CLAUDE.md editing')
+  .option('-p, --port <number>', 'API server port', '3001')
+  .action((options) => serveCommand({ port: parseInt(options.port, 10) }));
 
 program.parse();
