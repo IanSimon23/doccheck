@@ -92,6 +92,9 @@ function validateReadmeClaims(info: ProjectInfo): ValidationResult[] {
   // Validate structure claims
   results.push(...validateStructureClaims(info));
 
+  // Validate command claims
+  results.push(...validateCommandClaims(info));
+
   // Tech stack validation requires package manager
   if (!info.packageManager) {
     return results;
@@ -191,6 +194,46 @@ function normalizeTechName(name: string): string {
     .toLowerCase()
     .replace(/[\s\-_.]+/g, '')
     .replace(/\.js$/, 'js');
+}
+
+function validateCommandClaims(info: ProjectInfo): ValidationResult[] {
+  const results: ValidationResult[] = [];
+
+  if (!info.readmeClaims?.commands.length || !info.packageManager) {
+    return results;
+  }
+
+  const scripts = Object.keys(info.packageManager.scripts || {});
+
+  // Check each claimed command against actual scripts
+  for (const claimed of info.readmeClaims.commands) {
+    if (!scripts.includes(claimed)) {
+      results.push({
+        rule: 'readme-command-drift',
+        severity: 'warning',
+        message: `README documents "npm run ${claimed}" but script doesn't exist`,
+        suggestion: `Remove command from README or add "${claimed}" to package.json scripts`,
+      });
+    }
+  }
+
+  // Check for scripts not mentioned in README
+  const commonScripts = ['dev', 'build', 'start', 'test', 'lint'];
+  for (const script of scripts) {
+    if (commonScripts.includes(script)) {
+      const documented = info.readmeClaims.commands.includes(script);
+      if (!documented) {
+        results.push({
+          rule: 'readme-command-incomplete',
+          severity: 'info',
+          message: `Script "${script}" exists but not documented in README`,
+          suggestion: `Consider documenting "npm run ${script}" in README`,
+        });
+      }
+    }
+  }
+
+  return results;
 }
 
 function validateStructureClaims(info: ProjectInfo): ValidationResult[] {

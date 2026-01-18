@@ -171,7 +171,7 @@ function parseReadmeClaims(readme: string): ReadmeClaims {
   return {
     techStack: extractTechStackClaims(readme),
     structure: extractStructureClaims(readme),
-    commands: [],  // TODO: future iteration
+    commands: extractCommandClaims(readme),
   };
 }
 
@@ -308,4 +308,33 @@ function parseDirectoryTree(lines: string[]): string[] {
 
   // Only return entries if this looked like a directory tree
   return looksLikeTree ? entries : [];
+}
+
+function extractCommandClaims(readme: string): string[] {
+  const claims: string[] = [];
+
+  // Match npm/yarn/pnpm run commands
+  // Patterns: "npm run dev", "yarn build", "pnpm run test"
+  // Script name must start with a letter
+  const npmRunPattern = /(?:npm\s+run|yarn\s+run|pnpm\s+run)\s+([a-zA-Z][a-zA-Z0-9_:-]*)/g;
+
+  let match;
+  while ((match = npmRunPattern.exec(readme)) !== null) {
+    claims.push(match[1]);
+  }
+
+  // Also match yarn/pnpm without "run": "yarn dev", "pnpm build"
+  // But require the script name to look like a script (not flags like -g)
+  const shortPattern = /(?:yarn|pnpm)\s+([a-zA-Z][a-zA-Z0-9_:-]*)/g;
+  while ((match = shortPattern.exec(readme)) !== null) {
+    const scriptName = match[1];
+    // Skip common yarn/pnpm subcommands that aren't scripts
+    const subcommands = ['add', 'remove', 'install', 'init', 'run', 'global', 'config', 'cache', 'link', 'unlink'];
+    if (!subcommands.includes(scriptName) && !claims.includes(scriptName)) {
+      claims.push(scriptName);
+    }
+  }
+
+  // Dedupe
+  return claims.filter((c, i, arr) => arr.indexOf(c) === i);
 }
