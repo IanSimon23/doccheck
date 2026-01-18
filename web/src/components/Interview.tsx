@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ChevronRight, ChevronLeft, Check, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronLeft, Check, Save, RefreshCw } from 'lucide-react';
 
 interface ProjectInfo {
   name: string;
@@ -16,6 +16,19 @@ interface ProjectInfo {
   };
   hasTests: boolean;
   claudeMd: string | null;
+}
+
+interface Profile {
+  name: string;
+  description?: string;
+  defaults: Record<string, string>;
+  techStack?: Record<string, string>;
+}
+
+interface ClaudeMdConfig {
+  activeProfile?: string;
+  globalDefaults: Record<string, string>;
+  profiles: Profile[];
 }
 
 interface InterviewProps {
@@ -80,13 +93,52 @@ const INTERVIEW_STEPS: InterviewStep[] = [
 
 function Interview({ projectInfo, claudeMd: _claudeMd, onUpdate, onSave }: InterviewProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>(() => {
-    // Try to extract existing answers from CLAUDE.md
-    const extracted: Record<string, string> = {};
-    // For now, start fresh - could parse existing content later
-    return extracted;
-  });
+  const [config, setConfig] = useState<ClaudeMdConfig | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<string>('default');
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
+
+  // Load config on mount
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then((data: ClaudeMdConfig) => {
+        setConfig(data);
+        setSelectedProfile(data.activeProfile || 'default');
+      })
+      .catch(err => console.error('Failed to load config:', err));
+  }, []);
+
+  // Load defaults when profile changes
+  const loadProfileDefaults = () => {
+    if (!config) return;
+
+    const profile = config.profiles.find(p => p.name === selectedProfile);
+    const merged = {
+      ...config.globalDefaults,
+      ...profile?.defaults,
+    };
+
+    // Map config keys to interview step IDs
+    const keyMap: Record<string, string> = {
+      practices: 'practices',
+      architecture: 'architecture',
+      quality: 'quality',
+      gotchas: 'gotchas',
+      domain: 'domain',
+      purpose: 'purpose',
+      goals: 'goals',
+    };
+
+    const newAnswers: Record<string, string> = {};
+    for (const [configKey, stepId] of Object.entries(keyMap)) {
+      if (merged[configKey]) {
+        newAnswers[stepId] = merged[configKey];
+      }
+    }
+
+    setAnswers(prev => ({ ...prev, ...newAnswers }));
+  };
 
   const step = INTERVIEW_STEPS[currentStep];
   const isFirst = currentStep === 0;
@@ -182,6 +234,31 @@ function Interview({ projectInfo, claudeMd: _claudeMd, onUpdate, onSave }: Inter
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Profile Selector */}
+      {config && config.profiles.length > 0 && (
+        <div className="mb-6 flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+          <label className="text-sm font-medium text-gray-700">Profile:</label>
+          <select
+            value={selectedProfile}
+            onChange={(e) => setSelectedProfile(e.target.value)}
+            className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+          >
+            {config.profiles.map(p => (
+              <option key={p.name} value={p.name}>
+                {p.name} {p.description ? `- ${p.description}` : ''}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={loadProfileDefaults}
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Load Defaults
+          </button>
+        </div>
+      )}
+
       {/* Progress */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">

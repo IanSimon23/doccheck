@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { scanProject } from '../scanner/index.js';
 import { validateClaudeMd } from '../validator/index.js';
+import { loadConfig, saveConfig, type ClaudeMdConfig } from '../config/index.js';
 
 interface ServeOptions {
   port: number;
@@ -35,6 +36,10 @@ export async function serveCommand(options: ServeOptions): Promise<void> {
         await handleSave(req, res, projectPath);
       } else if (url === '/api/check' && req.method === 'GET') {
         await handleCheck(req, res, projectPath);
+      } else if (url === '/api/config' && req.method === 'GET') {
+        await handleGetConfig(req, res);
+      } else if (url === '/api/config' && req.method === 'POST') {
+        await handleSaveConfig(req, res);
       } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Not found' }));
@@ -121,6 +126,26 @@ async function handleCheck(
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ results }));
+}
+
+async function handleGetConfig(
+  _req: IncomingMessage,
+  res: ServerResponse
+): Promise<void> {
+  const config = loadConfig();
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(config));
+}
+
+async function handleSaveConfig(
+  req: IncomingMessage,
+  res: ServerResponse
+): Promise<void> {
+  const body = await readBody(req);
+  const config = JSON.parse(body) as ClaudeMdConfig;
+  saveConfig(config);
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ success: true }));
 }
 
 function readBody(req: IncomingMessage): Promise<string> {

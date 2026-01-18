@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Loader2, Settings as SettingsIcon, Lightbulb } from 'lucide-react';
 import Interview from './components/Interview';
 import AuditReview from './components/AuditReview';
 import Editor from './components/Editor';
+import Settings from './components/Settings';
+import Brainstorm from './components/Brainstorm';
 
 interface ProjectInfo {
   name: string;
@@ -28,7 +30,7 @@ interface ValidationResult {
   suggestion?: string;
 }
 
-type Tab = 'interview' | 'audit' | 'editor';
+type Tab = 'brainstorm' | 'interview' | 'audit' | 'editor' | 'settings';
 
 function App() {
   const [projectInfo, setProjectInfo] = useState<ProjectInfo | null>(null);
@@ -145,6 +147,17 @@ function App() {
         <div className="max-w-6xl mx-auto px-4">
           <nav className="flex gap-6">
             <button
+              onClick={() => setActiveTab('brainstorm')}
+              className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors flex items-center gap-1 ${
+                activeTab === 'brainstorm'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Lightbulb className="w-4 h-4" />
+              Brainstorm
+            </button>
+            <button
               onClick={() => setActiveTab('interview')}
               className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
                 activeTab === 'interview'
@@ -179,12 +192,32 @@ function App() {
             >
               Editor
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-3 px-1 border-b-2 text-sm font-medium transition-colors flex items-center gap-1 ${
+                activeTab === 'settings'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <SettingsIcon className="w-4 h-4" />
+              Settings
+            </button>
           </nav>
         </div>
       </div>
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 py-6">
+        {activeTab === 'brainstorm' && (
+          <Brainstorm
+            onExtract={(sections) => {
+              // TODO: Pass extracted sections to interview
+              console.log('Extracted sections:', sections);
+              setActiveTab('interview');
+            }}
+          />
+        )}
         {activeTab === 'interview' && (
           <Interview
             projectInfo={projectInfo}
@@ -207,6 +240,9 @@ function App() {
             onChange={setClaudeMd}
             onSave={handleSave}
           />
+        )}
+        {activeTab === 'settings' && (
+          <Settings />
         )}
       </main>
     </div>
