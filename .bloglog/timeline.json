@@ -167,6 +167,26 @@
       "timestamp": "2026-01-19T19:13:19.443Z",
       "type": "win",
       "content": "Full recovery from ghost directory corruption. Project restored from backup with all source, tests, git history, and bloglog timeline intact. Build passes, tests pass, git status clean."
+    },
+    {
+      "id": "c152fdcb-739f-414b-8bf6-88e5c58bab2b",
+      "timestamp": "2026-01-19T19:14:10.354Z",
+      "type": "commit",
+      "message": "Update timeline with recovery blocker and win entries",
+      "gitHash": "2cf5774658fdde3bbdd3614b5fbbd3f0a18c2c95"
+    },
+    {
+      "id": "abe7ed0e-0d32-46ae-a2e1-8304047c69d0",
+      "timestamp": "2026-01-19T19:27:16.695Z",
+      "type": "commit",
+      "message": "Add LEARNINGS.md - honest assessment that mechanical approach may not be the right solution",
+      "gitHash": "d3cae26c560e9f4284fb04b6056523e49b160459"
+    },
+    {
+      "id": "5d79541f-8889-42d3-9d8f-8e32a88b611a",
+      "timestamp": "2026-01-19T20:14:01.260Z",
+      "type": "note",
+      "content": "Closing out DocCheck project. Key learning: mechanical documentation validation sits in an uncomfortable middle ground - too dumb for semantic checks, too complex for what grep could do. For small scale, just ask Claude. For large scale, you need AI anyway. Documentation drift is a workflow problem, not a tooling problem."
     }
   ]
 }
