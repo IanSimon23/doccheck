@@ -200,6 +200,13 @@
       "timestamp": "2026-01-19T20:36:20.618Z",
       "type": "note",
       "content": "Pivot insight: drifted from coaching tools (Jironaut) to personal build tools (BlogLog, DocCheck). The original problem - teams can't articulate context - is still valid and unsolved. An AI-guided context builder that interviews users to extract clear problem statements could be more valuable than mechanical validation. Pivot back to coaching tools."
+    },
+    {
+      "id": "d1413752-7b4e-4a0b-b627-9eed33f95e55",
+      "timestamp": "2026-01-19T20:36:46.114Z",
+      "type": "commit",
+      "message": "Add pivot insight - return to coaching tools",
+      "gitHash": "e95d98d26ce5ca3a032bdca940204312ccf64bdf"
     }
   ]
 }
