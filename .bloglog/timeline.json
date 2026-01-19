@@ -129,6 +129,44 @@
       "type": "commit",
       "message": "Fix: add error handling for JSON.parse in serve.ts API handlers, fix unknown[] types to ValidationResult[]",
       "gitHash": "036666e50b4884a0c9776ec2f1291acf7b321d0a"
+    },
+    {
+      "id": "5b9e411d-4d1d-470c-9714-33a3a03abc9f",
+      "timestamp": "2026-01-19T07:09:53.544Z",
+      "type": "commit",
+      "message": "Fix: escape special regex characters in project name to prevent RegExp injection errors",
+      "gitHash": "abc9ed25289186135ab31834386af558e991ab7b"
+    },
+    {
+      "id": "1016174b-30e7-48d5-aa65-5dbcaca77d59",
+      "timestamp": "2026-01-19T07:10:05.518Z",
+      "type": "note",
+      "content": "REMAINING REFACTORING ITEMS:\n1. Unused props in AuditReview (claudeMd, onUpdate, onSave) - indicates incomplete 'Add to CLAUDE.md' feature\n2. Incomplete Brainstorm → Interview wiring (extracted sections just log to console)\n3. Inconsistent async patterns - some .then() chains, some async/await\n4. Hardcoded API paths in web components - could centralize in api.ts\n5. Duplicate severity switch statements in AuditReview - could extract to config object\n6. Settings profile name bug still unresolved"
+    },
+    {
+      "id": "8e861924-5992-4e40-a967-603f733dbf87",
+      "timestamp": "2026-01-19T07:10:26.708Z",
+      "type": "win",
+      "content": "Refactoring session: renamed to DocCheck, consolidated shared types, added JSON error handling, fixed regex injection risk. Codebase in clean state."
+    },
+    {
+      "id": "4c3db039-cbf4-432b-8df6-9be4187652f2",
+      "timestamp": "2026-01-19T19:09:39.714Z",
+      "type": "commit",
+      "message": "Add README.md with project overview, installation, and usage docs",
+      "gitHash": "a229266b43627612f343960b6bc0e18c0ca97355"
+    },
+    {
+      "id": "83cd389f-f928-4bdd-a9b4-df8b30fd095f",
+      "timestamp": "2026-01-19T19:12:31.673Z",
+      "type": "blocker",
+      "content": "Renaming project from claude-md to doccheck created ghost directory nightmare. Moving/renaming directories seemed to corrupt something - possibly WSL/Windows filesystem interaction. Resolution required restoring from backup (doccheck-temp in Documents after /tmp backup was cleared by WSL restart). Additional gotcha: cp wildcard (*) doesn't copy hidden files - had to manually copy .git, .gitignore, .bloglog separately."
+    },
+    {
+      "id": "dc0edcd9-4275-4cb3-af6e-801113ae43cb",
+      "timestamp": "2026-01-19T19:13:19.443Z",
+      "type": "win",
+      "content": "Full recovery from ghost directory corruption. Project restored from backup with all source, tests, git history, and bloglog timeline intact. Build passes, tests pass, git status clean."
     }
   ]
 }
