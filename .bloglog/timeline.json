@@ -122,6 +122,13 @@
       "timestamp": "2026-01-19T07:05:14.638Z",
       "type": "note",
       "content": "INSIGHT: Regular refactoring during build is essential. We just consolidated 5 duplicate type definitions that had accumulated over just a few sessions of feature work. Left unchecked, this tech debt compounds - each duplicate becomes a potential source of drift and bugs. The rename from claudemd to DocCheck was the perfect forcing function: touching every file revealed the duplicates. Lesson: periodic 'refactoring passes' during active development catch issues while context is fresh and the codebase is still small enough to fix easily."
+    },
+    {
+      "id": "7b9e8ac6-a993-45de-aafc-ff63cbb2f053",
+      "timestamp": "2026-01-19T07:07:39.488Z",
+      "type": "commit",
+      "message": "Fix: add error handling for JSON.parse in serve.ts API handlers, fix unknown[] types to ValidationResult[]",
+      "gitHash": "036666e50b4884a0c9776ec2f1291acf7b321d0a"
     }
   ]
 }

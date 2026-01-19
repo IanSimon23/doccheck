@@ -243,11 +243,14 @@ function validateStructureClaims(info: ProjectInfo): ValidationResult[] {
   const projectRoot = info.path;
   const projectName = info.name;
 
+  // Escape special regex characters in project name
+  const escapedName = projectName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   // Normalize claimed paths - strip project name prefix if present
   const normalizedClaims = info.readmeClaims.structure
     .map(s => {
       // Strip "projectname/" prefix
-      const prefixPattern = new RegExp(`^${projectName}/`);
+      const prefixPattern = new RegExp(`^${escapedName}/`);
       return s.replace(prefixPattern, '');
     })
     .filter(s => s && s !== '/');  // filter empty and root-only
