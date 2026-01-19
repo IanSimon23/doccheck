@@ -103,6 +103,25 @@
       "timestamp": "2026-01-19T06:51:04.912Z",
       "type": "win",
       "content": "Completed rename from claudemd to DocCheck - CLI command, packages, config paths, types, functions, and UI all updated. All tests pass."
+    },
+    {
+      "id": "9a0b4e23-54da-4b9b-8213-d4e503f7c7fa",
+      "timestamp": "2026-01-19T07:03:48.794Z",
+      "type": "commit",
+      "message": "Refactor: extract shared types to src/shared/types.ts - consolidates ProjectInfo, ValidationResult, Profile, DocCheckConfig into single source of truth",
+      "gitHash": "f46939b16420bd20917f732161007d25734bd545"
+    },
+    {
+      "id": "06f3b911-f9ea-4508-8237-bfdb7f518038",
+      "timestamp": "2026-01-19T07:04:07.466Z",
+      "type": "win",
+      "content": "Consolidated shared types - eliminated duplicate interface definitions across CLI and web app. Single source of truth in src/shared/types.ts."
+    },
+    {
+      "id": "1b254319-075c-4f74-b502-6b512dc57c36",
+      "timestamp": "2026-01-19T07:05:14.638Z",
+      "type": "note",
+      "content": "INSIGHT: Regular refactoring during build is essential. We just consolidated 5 duplicate type definitions that had accumulated over just a few sessions of feature work. Left unchecked, this tech debt compounds - each duplicate becomes a potential source of drift and bugs. The rename from claudemd to DocCheck was the perfect forcing function: touching every file revealed the duplicates. Lesson: periodic 'refactoring passes' during active development catch issues while context is fresh and the codebase is still small enough to fix easily."
     }
   ]
 }

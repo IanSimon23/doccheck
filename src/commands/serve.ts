@@ -2,7 +2,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { scanProject } from '../scanner/index.js';
-import { validateDoc } from '../validator/index.js';
+import { validateDoc, type ValidationResult } from '../validator/index.js';
 import { loadConfig, saveConfig, type DocCheckConfig } from '../config/index.js';
 
 interface ServeOptions {
@@ -75,7 +75,7 @@ async function handleGetProject(
   }
 
   // Run validation
-  let validationResults: unknown[] = [];
+  let validationResults: ValidationResult[] = [];
   if (claudeMd) {
     validationResults = validateDoc(claudeMd, projectInfo);
   }
@@ -100,7 +100,16 @@ async function handleSave(
   projectPath: string
 ): Promise<void> {
   const body = await readBody(req);
-  const { content } = JSON.parse(body);
+
+  let content: string;
+  try {
+    const parsed = JSON.parse(body);
+    content = parsed.content;
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
+    return;
+  }
 
   const claudeMdPath = join(projectPath, 'CLAUDE.md');
   writeFileSync(claudeMdPath, content);
@@ -117,7 +126,7 @@ async function handleCheck(
   const projectInfo = await scanProject(projectPath);
 
   const claudeMdPath = join(projectPath, 'CLAUDE.md');
-  let results: unknown[] = [];
+  let results: ValidationResult[] = [];
 
   if (existsSync(claudeMdPath)) {
     const claudeMd = readFileSync(claudeMdPath, 'utf-8');
@@ -142,7 +151,16 @@ async function handleSaveConfig(
   res: ServerResponse
 ): Promise<void> {
   const body = await readBody(req);
-  const config = JSON.parse(body) as DocCheckConfig;
+
+  let config: DocCheckConfig;
+  try {
+    config = JSON.parse(body) as DocCheckConfig;
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
+    return;
+  }
+
   saveConfig(config);
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ success: true }));
