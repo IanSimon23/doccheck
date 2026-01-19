@@ -6,7 +6,7 @@ describe('scanProject', () => {
   it('detects package.json in current project', async () => {
     const info = await scanProject(process.cwd());
 
-    expect(info.name).toBe('claudemd');
+    expect(info.name).toBe('doccheck');
     expect(info.packageManager).not.toBeNull();
     expect(info.packageManager?.type).toBe('npm');
   });

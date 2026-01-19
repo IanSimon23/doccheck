@@ -7,8 +7,8 @@ import { serveCommand } from './commands/serve.js';
 const program = new Command();
 
 program
-  .name('claudemd')
-  .description('Generate and maintain living CLAUDE.md documentation')
+  .name('doccheck')
+  .description('Generate and validate living CLAUDE.md documentation')
   .version('0.1.0');
 
 program

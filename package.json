@@ -1,10 +1,10 @@
 {
-  "name": "claudemd",
+  "name": "doccheck",
   "version": "0.1.0",
-  "description": "CLI tool that generates and maintains living CLAUDE.md documentation",
+  "description": "CLI tool that generates and validates living CLAUDE.md documentation",
   "type": "module",
   "bin": {
-    "claudemd": "./dist/index.js"
+    "doccheck": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 import { scanProject } from '../scanner/index.js';
-import { validateClaudeMd } from '../validator/index.js';
+import { validateDoc } from '../validator/index.js';
 
 interface CheckOptions {
   file: string;
@@ -11,13 +11,13 @@ export async function checkCommand(options: CheckOptions): Promise<void> {
   const { file, json } = options;
 
   if (!existsSync(file)) {
-    console.error(`Error: ${file} not found. Run 'claudemd init' first.`);
+    console.error(`Error: ${file} not found. Run 'doccheck init' first.`);
     process.exit(1);
   }
 
   const claudeMdContent = readFileSync(file, 'utf-8');
   const projectInfo = await scanProject(process.cwd());
-  const results = validateClaudeMd(claudeMdContent, projectInfo);
+  const results = validateDoc(claudeMdContent, projectInfo);
 
   if (json) {
     console.log(JSON.stringify(results, null, 2));

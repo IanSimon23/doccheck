@@ -1,6 +1,6 @@
 import type { ProjectInfo } from '../scanner/index.js';
 
-export function generateClaudeMd(info: ProjectInfo): string {
+export function generateDoc(info: ProjectInfo): string {
   const sections: string[] = [];
 
   sections.push(generateHeader(info));

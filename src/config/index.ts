@@ -23,7 +23,7 @@ export interface Profile {
   };
 }
 
-export interface ClaudeMdConfig {
+export interface DocCheckConfig {
   activeProfile?: string;
   globalDefaults: {
     practices?: string;
@@ -34,7 +34,7 @@ export interface ClaudeMdConfig {
   profiles: Profile[];
 }
 
-const DEFAULT_CONFIG: ClaudeMdConfig = {
+const DEFAULT_CONFIG: DocCheckConfig = {
   globalDefaults: {
     practices: '',
     architecture: '',
@@ -51,14 +51,14 @@ const DEFAULT_CONFIG: ClaudeMdConfig = {
 };
 
 export function getConfigDir(): string {
-  return join(homedir(), '.claudemd');
+  return join(homedir(), '.doccheck');
 }
 
 export function getConfigPath(): string {
   return join(getConfigDir(), 'config.json');
 }
 
-export function loadConfig(): ClaudeMdConfig {
+export function loadConfig(): DocCheckConfig {
   const configPath = getConfigPath();
 
   if (!existsSync(configPath)) {
@@ -67,7 +67,7 @@ export function loadConfig(): ClaudeMdConfig {
 
   try {
     const content = readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(content) as ClaudeMdConfig;
+    const config = JSON.parse(content) as DocCheckConfig;
     return {
       ...DEFAULT_CONFIG,
       ...config,
@@ -82,7 +82,7 @@ export function loadConfig(): ClaudeMdConfig {
   }
 }
 
-export function saveConfig(config: ClaudeMdConfig): void {
+export function saveConfig(config: DocCheckConfig): void {
   const configDir = getConfigDir();
   const configPath = getConfigPath();
 
@@ -93,13 +93,13 @@ export function saveConfig(config: ClaudeMdConfig): void {
   writeFileSync(configPath, JSON.stringify(config, null, 2));
 }
 
-export function getProfile(config: ClaudeMdConfig, name?: string): Profile | undefined {
+export function getProfile(config: DocCheckConfig, name?: string): Profile | undefined {
   const profileName = name || config.activeProfile || 'default';
   return config.profiles.find(p => p.name === profileName);
 }
 
 export function mergeWithDefaults(
-  config: ClaudeMdConfig,
+  config: DocCheckConfig,
   profileName?: string
 ): Profile['defaults'] {
   const profile = getProfile(config, profileName);

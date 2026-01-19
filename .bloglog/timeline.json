@@ -65,6 +65,25 @@
       "type": "commit",
       "message": "Add config system with profiles, Settings tab, and Brainstorm scratchpad - supports global defaults, multiple profiles with tech stacks, and freeform ideation",
       "gitHash": "b373028872740f3bdb4ab935bbf1a964402a8911"
+    },
+    {
+      "id": "13f3492a-9325-4ddc-9486-dc669ea462bd",
+      "timestamp": "2026-01-19T06:29:09.070Z",
+      "type": "commit",
+      "message": "Settings: refactor profile editing to use index-based tracking instead of name-based - attempted fix for profile rename bug (still investigating)",
+      "gitHash": "7bd9c581d9f4030d7a804540e20fe0df160c629a"
+    },
+    {
+      "id": "59f36d89-6ac4-473d-9372-e3066ec70e53",
+      "timestamp": "2026-01-19T06:29:26.353Z",
+      "type": "note",
+      "content": "BUG: Profile name editing in Settings.tsx still causes form to collapse after typing one character. Tried switching from name-based to index-based tracking, and using functional state updates - neither fixed it. Other fields (tech stack, defaults) work fine. Something specific to the name field update is causing the issue. Needs further investigation."
+    },
+    {
+      "id": "c29e48d2-0d92-4e89-95f6-12d16abc69a9",
+      "timestamp": "2026-01-19T06:29:38.328Z",
+      "type": "win",
+      "content": "Web app foundation complete with Interview wizard, Brainstorm scratchpad, Audit Review, Editor, and Settings with profile management. Config system stores defaults in ~/.claudemd/config.json with multiple profile support."
     }
   ]
 }

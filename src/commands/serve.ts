@@ -2,8 +2,8 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { scanProject } from '../scanner/index.js';
-import { validateClaudeMd } from '../validator/index.js';
-import { loadConfig, saveConfig, type ClaudeMdConfig } from '../config/index.js';
+import { validateDoc } from '../validator/index.js';
+import { loadConfig, saveConfig, type DocCheckConfig } from '../config/index.js';
 
 interface ServeOptions {
   port: number;
@@ -13,7 +13,7 @@ export async function serveCommand(options: ServeOptions): Promise<void> {
   const { port } = options;
   const projectPath = process.cwd();
 
-  console.log(`Starting claudemd server for: ${projectPath}`);
+  console.log(`Starting DocCheck server for: ${projectPath}`);
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     // CORS headers
@@ -77,7 +77,7 @@ async function handleGetProject(
   // Run validation
   let validationResults: unknown[] = [];
   if (claudeMd) {
-    validationResults = validateClaudeMd(claudeMd, projectInfo);
+    validationResults = validateDoc(claudeMd, projectInfo);
   }
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -121,7 +121,7 @@ async function handleCheck(
 
   if (existsSync(claudeMdPath)) {
     const claudeMd = readFileSync(claudeMdPath, 'utf-8');
-    results = validateClaudeMd(claudeMd, projectInfo);
+    results = validateDoc(claudeMd, projectInfo);
   }
 
   res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -142,7 +142,7 @@ async function handleSaveConfig(
   res: ServerResponse
 ): Promise<void> {
   const body = await readBody(req);
-  const config = JSON.parse(body) as ClaudeMdConfig;
+  const config = JSON.parse(body) as DocCheckConfig;
   saveConfig(config);
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ success: true }));

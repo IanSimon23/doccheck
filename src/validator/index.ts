@@ -9,7 +9,7 @@ export interface ValidationResult {
   suggestion?: string;
 }
 
-export function validateClaudeMd(claudeMdContent: string, projectInfo: ProjectInfo): ValidationResult[] {
+export function validateDoc(claudeMdContent: string, projectInfo: ProjectInfo): ValidationResult[] {
   const results: ValidationResult[] = [];
 
   results.push(...validateTechStack(claudeMdContent, projectInfo));

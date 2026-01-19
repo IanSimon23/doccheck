@@ -1,5 +1,5 @@
 import { scanProject } from '../scanner/index.js';
-import { generateClaudeMd } from '../generator/index.js';
+import { generateDoc } from '../generator/index.js';
 import { existsSync, writeFileSync } from 'fs';
 
 interface InitOptions {
@@ -19,7 +19,7 @@ export async function initCommand(options: InitOptions): Promise<void> {
   const projectInfo = await scanProject(process.cwd());
 
   console.log('Generating CLAUDE.md...');
-  const content = generateClaudeMd(projectInfo);
+  const content = generateDoc(projectInfo);
 
   writeFileSync(output, content);
   console.log(`Created ${output}`);
