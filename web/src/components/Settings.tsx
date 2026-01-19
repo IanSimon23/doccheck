@@ -42,7 +42,7 @@ function Settings({ onProfileChange }: SettingsProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [expandedProfile, setExpandedProfile] = useState<string | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [editingGlobals, setEditingGlobals] = useState(false);
 
   useEffect(() => {
@@ -54,8 +54,9 @@ function Settings({ onProfileChange }: SettingsProps) {
       const response = await fetch('/api/config');
       const data = await response.json();
       setConfig(data);
-      if (data.profiles?.length > 0 && !expandedProfile) {
-        setExpandedProfile(data.activeProfile || data.profiles[0].name);
+      if (data.profiles?.length > 0 && expandedIndex === null) {
+        const activeIdx = data.profiles.findIndex((p: Profile) => p.name === data.activeProfile);
+        setExpandedIndex(activeIdx >= 0 ? activeIdx : 0);
       }
     } catch (err) {
       console.error('Failed to load config:', err);
@@ -90,11 +91,12 @@ function Settings({ onProfileChange }: SettingsProps) {
       defaults: {},
       techStack: {},
     };
+    const newProfiles = [...config.profiles, newProfile];
     setConfig({
       ...config,
-      profiles: [...config.profiles, newProfile],
+      profiles: newProfiles,
     });
-    setExpandedProfile(newProfile.name);
+    setExpandedIndex(newProfiles.length - 1);
   };
 
   const handleDeleteProfile = (name: string) => {
@@ -112,34 +114,47 @@ function Settings({ onProfileChange }: SettingsProps) {
     onProfileChange?.(name);
   };
 
-  const updateProfile = (name: string, updates: Partial<Profile>) => {
-    if (!config) return;
-    setConfig({
-      ...config,
-      profiles: config.profiles.map(p =>
-        p.name === name ? { ...p, ...updates } : p
-      ),
+  const updateProfileByIndex = (index: number, updates: Partial<Profile>) => {
+    setConfig(prev => {
+      if (!prev) return prev;
+
+      const oldName = prev.profiles[index]?.name;
+      const newName = updates.name;
+
+      // Update activeProfile if this was the active one and name changed
+      let newActiveProfile = prev.activeProfile;
+      if (newName && oldName && prev.activeProfile === oldName) {
+        newActiveProfile = newName;
+      }
+
+      return {
+        ...prev,
+        activeProfile: newActiveProfile,
+        profiles: prev.profiles.map((p, i) =>
+          i === index ? { ...p, ...updates } : p
+        ),
+      };
     });
   };
 
-  const updateProfileDefaults = (name: string, key: string, value: string) => {
+  const updateProfileDefaults = (index: number, key: string, value: string) => {
     if (!config) return;
     setConfig({
       ...config,
-      profiles: config.profiles.map(p =>
-        p.name === name
+      profiles: config.profiles.map((p, i) =>
+        i === index
           ? { ...p, defaults: { ...p.defaults, [key]: value } }
           : p
       ),
     });
   };
 
-  const updateProfileTechStack = (name: string, key: string, value: string) => {
+  const updateProfileTechStack = (index: number, key: string, value: string) => {
     if (!config) return;
     setConfig({
       ...config,
-      profiles: config.profiles.map(p =>
-        p.name === name
+      profiles: config.profiles.map((p, i) =>
+        i === index
           ? { ...p, techStack: { ...p.techStack, [key]: value } }
           : p
       ),
@@ -266,16 +281,14 @@ function Settings({ onProfileChange }: SettingsProps) {
       </div>
 
       <div className="space-y-3">
-        {config.profiles.map((profile) => (
+        {config.profiles.map((profile, index) => (
           <div
-            key={profile.name}
+            key={index}
             className="bg-white rounded-lg border border-gray-200 overflow-hidden"
           >
             <div
               className="flex items-center justify-between p-4 cursor-pointer"
-              onClick={() => setExpandedProfile(
-                expandedProfile === profile.name ? null : profile.name
-              )}
+              onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
             >
               <div className="flex items-center gap-3">
                 <div>
@@ -315,7 +328,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
-                {expandedProfile === profile.name ? (
+                {expandedIndex === index ? (
                   <ChevronUp className="w-5 h-5 text-gray-400" />
                 ) : (
                   <ChevronDown className="w-5 h-5 text-gray-400" />
@@ -323,7 +336,7 @@ function Settings({ onProfileChange }: SettingsProps) {
               </div>
             </div>
 
-            {expandedProfile === profile.name && (
+            {expandedIndex === index && (
               <div className="p-4 pt-0 border-t border-gray-100 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -333,7 +346,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                     <input
                       type="text"
                       value={profile.name}
-                      onChange={(e) => updateProfile(profile.name, { name: e.target.value })}
+                      onChange={(e) => updateProfileByIndex(index, { name: e.target.value })}
                       disabled={profile.name === 'default'}
                       className="w-full p-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-50"
                     />
@@ -345,7 +358,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                     <input
                       type="text"
                       value={profile.description || ''}
-                      onChange={(e) => updateProfile(profile.name, { description: e.target.value })}
+                      onChange={(e) => updateProfileByIndex(index, { description: e.target.value })}
                       placeholder="e.g., For CLI tools"
                       className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                     />
@@ -360,7 +373,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <input
                         type="text"
                         value={profile.techStack?.language || ''}
-                        onChange={(e) => updateProfileTechStack(profile.name, 'language', e.target.value)}
+                        onChange={(e) => updateProfileTechStack(index, 'language', e.target.value)}
                         placeholder="e.g., TypeScript"
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                       />
@@ -370,7 +383,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <input
                         type="text"
                         value={profile.techStack?.framework || ''}
-                        onChange={(e) => updateProfileTechStack(profile.name, 'framework', e.target.value)}
+                        onChange={(e) => updateProfileTechStack(index, 'framework', e.target.value)}
                         placeholder="e.g., React, Express"
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                       />
@@ -380,7 +393,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <input
                         type="text"
                         value={profile.techStack?.styling || ''}
-                        onChange={(e) => updateProfileTechStack(profile.name, 'styling', e.target.value)}
+                        onChange={(e) => updateProfileTechStack(index, 'styling', e.target.value)}
                         placeholder="e.g., Tailwind CSS"
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                       />
@@ -390,7 +403,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <input
                         type="text"
                         value={profile.techStack?.testing || ''}
-                        onChange={(e) => updateProfileTechStack(profile.name, 'testing', e.target.value)}
+                        onChange={(e) => updateProfileTechStack(index, 'testing', e.target.value)}
                         placeholder="e.g., Vitest, Jest"
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                       />
@@ -405,7 +418,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <label className="block text-xs text-gray-500 mb-1">Practices</label>
                       <textarea
                         value={profile.defaults.practices || ''}
-                        onChange={(e) => updateProfileDefaults(profile.name, 'practices', e.target.value)}
+                        onChange={(e) => updateProfileDefaults(index, 'practices', e.target.value)}
                         placeholder="Override global practices..."
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                         rows={2}
@@ -415,7 +428,7 @@ function Settings({ onProfileChange }: SettingsProps) {
                       <label className="block text-xs text-gray-500 mb-1">Architecture</label>
                       <textarea
                         value={profile.defaults.architecture || ''}
-                        onChange={(e) => updateProfileDefaults(profile.name, 'architecture', e.target.value)}
+                        onChange={(e) => updateProfileDefaults(index, 'architecture', e.target.value)}
                         placeholder="Override global architecture..."
                         className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                         rows={2}
