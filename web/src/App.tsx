@@ -5,30 +5,7 @@ import AuditReview from './components/AuditReview';
 import Editor from './components/Editor';
 import Settings from './components/Settings';
 import Brainstorm from './components/Brainstorm';
-
-interface ProjectInfo {
-  name: string;
-  path: string;
-  packageManager: {
-    type: string;
-    dependencies: Record<string, string>;
-    devDependencies: Record<string, string>;
-    scripts: Record<string, string>;
-  } | null;
-  structure: {
-    directories: string[];
-    sourceDir: string | null;
-  };
-  hasTests: boolean;
-  claudeMd: string | null;
-}
-
-interface ValidationResult {
-  rule: string;
-  severity: 'error' | 'warning' | 'info';
-  message: string;
-  suggestion?: string;
-}
+import type { ProjectInfo, ValidationResult } from '../../src/shared/types';
 
 type Tab = 'brainstorm' | 'interview' | 'audit' | 'editor' | 'settings';
 

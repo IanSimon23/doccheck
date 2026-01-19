@@ -2,12 +2,9 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import type { ProjectInfo } from '../scanner/index.js';
 
-export interface ValidationResult {
-  rule: string;
-  severity: 'error' | 'warning' | 'info';
-  message: string;
-  suggestion?: string;
-}
+// Re-export ValidationResult from shared
+export type { ValidationResult } from '../shared/types.js';
+import type { ValidationResult } from '../shared/types.js';
 
 export function validateDoc(claudeMdContent: string, projectInfo: ProjectInfo): ValidationResult[] {
   const results: ValidationResult[] = [];

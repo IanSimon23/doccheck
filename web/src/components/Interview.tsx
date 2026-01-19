@@ -1,35 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft, Check, Save, RefreshCw } from 'lucide-react';
-
-interface ProjectInfo {
-  name: string;
-  path: string;
-  packageManager: {
-    type: string;
-    dependencies: Record<string, string>;
-    devDependencies: Record<string, string>;
-    scripts: Record<string, string>;
-  } | null;
-  structure: {
-    directories: string[];
-    sourceDir: string | null;
-  };
-  hasTests: boolean;
-  claudeMd: string | null;
-}
-
-interface Profile {
-  name: string;
-  description?: string;
-  defaults: Record<string, string>;
-  techStack?: Record<string, string>;
-}
-
-interface ClaudeMdConfig {
-  activeProfile?: string;
-  globalDefaults: Record<string, string>;
-  profiles: Profile[];
-}
+import type { ProjectInfo, DocCheckConfig } from '../../../src/shared/types';
 
 interface InterviewProps {
   projectInfo: ProjectInfo | null;
@@ -93,7 +64,7 @@ const INTERVIEW_STEPS: InterviewStep[] = [
 
 function Interview({ projectInfo, claudeMd: _claudeMd, onUpdate, onSave }: InterviewProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [config, setConfig] = useState<ClaudeMdConfig | null>(null);
+  const [config, setConfig] = useState<DocCheckConfig | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<string>('default');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
@@ -102,7 +73,7 @@ function Interview({ projectInfo, claudeMd: _claudeMd, onUpdate, onSave }: Inter
   useEffect(() => {
     fetch('/api/config')
       .then(res => res.json())
-      .then((data: ClaudeMdConfig) => {
+      .then((data: DocCheckConfig) => {
         setConfig(data);
         setSelectedProfile(data.activeProfile || 'default');
       })
@@ -131,9 +102,10 @@ function Interview({ projectInfo, claudeMd: _claudeMd, onUpdate, onSave }: Inter
     };
 
     const newAnswers: Record<string, string> = {};
+    const mergedRecord = merged as Record<string, string | undefined>;
     for (const [configKey, stepId] of Object.entries(keyMap)) {
-      if (merged[configKey]) {
-        newAnswers[stepId] = merged[configKey];
+      if (mergedRecord[configKey]) {
+        newAnswers[stepId] = mergedRecord[configKey];
       }
     }
 

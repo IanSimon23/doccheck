@@ -1,44 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, Check, ChevronDown, ChevronUp } from 'lucide-react';
-
-interface Profile {
-  name: string;
-  description?: string;
-  defaults: {
-    purpose?: string;
-    goals?: string;
-    practices?: string;
-    architecture?: string;
-    domain?: string;
-    gotchas?: string;
-    quality?: string;
-  };
-  techStack?: {
-    language?: string;
-    framework?: string;
-    styling?: string;
-    testing?: string;
-    other?: string[];
-  };
-}
-
-interface ClaudeMdConfig {
-  activeProfile?: string;
-  globalDefaults: {
-    practices?: string;
-    architecture?: string;
-    quality?: string;
-    gotchas?: string;
-  };
-  profiles: Profile[];
-}
+import type { Profile, DocCheckConfig } from '../../../src/shared/types';
 
 interface SettingsProps {
   onProfileChange?: (profileName: string) => void;
 }
 
 function Settings({ onProfileChange }: SettingsProps) {
-  const [config, setConfig] = useState<ClaudeMdConfig | null>(null);
+  const [config, setConfig] = useState<DocCheckConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

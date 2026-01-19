@@ -1,42 +1,22 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
-export interface ProjectInfo {
-  name: string;
-  path: string;
-  packageManager: PackageManagerInfo | null;
-  structure: DirectoryStructure;
-  hasTests: boolean;
-  testPatterns: string[];
-  cicd: CiCdInfo | null;
-  readme: string | null;
-  readmeClaims: ReadmeClaims | null;
-}
+// Re-export types from shared
+export type {
+  ProjectInfo,
+  ReadmeClaims,
+  PackageManagerInfo,
+  DirectoryStructure,
+  CiCdInfo,
+} from '../shared/types.js';
 
-export interface ReadmeClaims {
-  techStack: string[];
-  structure: string[];
-  commands: string[];
-}
-
-export interface PackageManagerInfo {
-  type: 'npm' | 'yarn' | 'pnpm' | 'pip' | 'cargo' | 'go';
-  configFile: string;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-  scripts: Record<string, string>;
-}
-
-export interface DirectoryStructure {
-  directories: string[];
-  hasSource: boolean;
-  sourceDir: string | null;
-}
-
-export interface CiCdInfo {
-  platform: 'github' | 'gitlab' | 'other';
-  files: string[];
-}
+import type {
+  ProjectInfo,
+  ReadmeClaims,
+  PackageManagerInfo,
+  DirectoryStructure,
+  CiCdInfo,
+} from '../shared/types.js';
 
 export async function scanProject(rootPath: string): Promise<ProjectInfo> {
   const name = getProjectName(rootPath);

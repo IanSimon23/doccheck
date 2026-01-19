@@ -84,6 +84,25 @@
       "timestamp": "2026-01-19T06:29:38.328Z",
       "type": "win",
       "content": "Web app foundation complete with Interview wizard, Brainstorm scratchpad, Audit Review, Editor, and Settings with profile management. Config system stores defaults in ~/.claudemd/config.json with multiple profile support."
+    },
+    {
+      "id": "e36d368b-38b7-4882-aded-c37af0fbc14c",
+      "timestamp": "2026-01-19T06:50:26.229Z",
+      "type": "commit",
+      "message": "Rename project from claudemd to DocCheck - updated package names, CLI command, config directory, types, functions, UI text, and CLAUDE.md",
+      "gitHash": "5a7910dccea7e2f4e530666094456c3103b2185f"
+    },
+    {
+      "id": "4a15209f-0789-45ce-bd96-12cc999f7e7a",
+      "timestamp": "2026-01-19T06:50:37.699Z",
+      "type": "note",
+      "content": "REFACTORING OBSERVATIONS during rename:\n1. CLAUDE.md was severely stale - didn't reflect web app, config system, or validation features. Updated to match reality.\n2. Web components (Settings.tsx, Interview.tsx) have duplicated interface definitions - Profile, ClaudeMdConfig defined in both. Should extract to shared types file.\n3. The Settings profile name bug is still unresolved - tried index-based tracking and functional state updates, neither fixed it. May need React DevTools debugging.\n4. package-lock.json files still reference old names - npm install will regenerate these.\n5. Consider renaming the git repo/folder from claude-md to doccheck for consistency."
+    },
+    {
+      "id": "73a73b45-ee98-4b13-8f39-188d6c33c115",
+      "timestamp": "2026-01-19T06:51:04.912Z",
+      "type": "win",
+      "content": "Completed rename from claudemd to DocCheck - CLI command, packages, config paths, types, functions, and UI all updated. All tests pass."
     }
   ]
 }

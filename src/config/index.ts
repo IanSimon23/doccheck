@@ -2,37 +2,9 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-export interface Profile {
-  name: string;
-  description?: string;
-  defaults: {
-    purpose?: string;
-    goals?: string;
-    practices?: string;
-    architecture?: string;
-    domain?: string;
-    gotchas?: string;
-    quality?: string;
-  };
-  techStack?: {
-    language?: string;
-    framework?: string;
-    styling?: string;
-    testing?: string;
-    other?: string[];
-  };
-}
-
-export interface DocCheckConfig {
-  activeProfile?: string;
-  globalDefaults: {
-    practices?: string;
-    architecture?: string;
-    quality?: string;
-    gotchas?: string;
-  };
-  profiles: Profile[];
-}
+// Re-export types from shared
+export type { Profile, DocCheckConfig } from '../shared/types.js';
+import type { Profile, DocCheckConfig } from '../shared/types.js';
 
 const DEFAULT_CONFIG: DocCheckConfig = {
   globalDefaults: {

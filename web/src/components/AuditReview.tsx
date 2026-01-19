@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { AlertTriangle, AlertCircle, Info, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
-
-interface ValidationResult {
-  rule: string;
-  severity: 'error' | 'warning' | 'info';
-  message: string;
-  suggestion?: string;
-}
+import type { ValidationResult } from '../../../src/shared/types';
 
 interface AuditReviewProps {
   results: ValidationResult[];
